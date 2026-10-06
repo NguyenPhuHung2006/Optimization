@@ -1,0 +1,1 @@
+{"name":"Local: nqueen","url":"c:\\STUDY\\HK3_1\\TAI_LIEU_5\\Optimization\\midterm\\code\\nqueen.cpp","tests":[{"id":1791088434719,"input":"4 0 0 0 0\n8 2 0 0 0 4 0 0 0","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\STUDY\\HK3_1\\TAI_LIEU_5\\Optimization\\midterm\\code\\nqueen.cpp","group":"local","local":true}
