@@ -31,11 +31,20 @@ int randomNumber(int n) {
     return dist(rng);
 }
 
+int n, m;
+vector<vector<int>> q;
+
+int POPULATION_SIZE;
+int ELITE_COUNT;
+int MUTATION_BITS;
+int TOURNAMENT_SIZE;
+int NUM_GENERATION;
+constexpr int N = 500;
+
 void solve() {
-    int n, m;
     cin >> n >> m;
     int mm = m;
-    vector<vector<int>> q(n, vector<int>(n));
+    q.assign(n, vector<int>(n));
     while (mm--) {
         int i, j, v;
         cin >> i >> j >> v;
@@ -43,26 +52,25 @@ void solve() {
         q[j][i] = v;
     }
 
-    int POPULATION_SIZE = 100;
-    int ELITE_COUNT = 0.05 * POPULATION_SIZE;
-    int MUTATION_BITS = 1;
-    int TOURNAMENT_SIZE = 3;
-    int NUM_GENERATION = 1000;
-    constexpr int N = 500;
+    POPULATION_SIZE = 100;
+    ELITE_COUNT = 0.05 * POPULATION_SIZE;
+    MUTATION_BITS = 1;
+    TOURNAMENT_SIZE = 3;
+    NUM_GENERATION = 1000;
 
     struct Candidate {
         bitset<N> x;
         ll score;
         vector<ll> delta;
 
-        void setRandomX(const int& n) {
+        void setRandomX() {
             for (int i = 0; i < n; i++) {
                 x[i] = randomNumber(1);
             }
         } 
 
         // this function should only be called when setRandomX is called
-        void init(const int& n, const vector<vector<int>>& q) {
+        void init() {
             delta.assign(n, 0LL);
             score = 0LL;
             for (int i = 0; i < n; i++) {
@@ -76,7 +84,7 @@ void solve() {
             }
         }
 
-        void flip(int i, const int& n, const vector<vector<int>>& q) {
+        void flip(int i) {
             score += delta[i];
             for (int j = 0; j < n; j++) {
                 if (i == j) {
@@ -88,7 +96,14 @@ void solve() {
             x.flip(i);
         }
 
-        Candidate crossOver(const Candidate& other, const int& n, const vector<vector<int>>& q) {
+        void mutate() {
+            for (int i = 0; i < MUTATION_BITS; i++) {
+                int j = randomNumber(n - 1);
+                flip(j);
+            }
+        }
+
+        Candidate crossOver(const Candidate& other) {
 
         }
 
@@ -105,8 +120,8 @@ void solve() {
     auto generateCandidates = [&]() {
         for (int p = 0; p < POPULATION_SIZE; p++) {
             Candidate candidate;
-            candidate.setRandomX(n);
-            candidate.init(n, q);
+            candidate.setRandomX();
+            candidate.init();
             population[p] = candidate;
             if (candidate.score > best_score) {
                 best_score = candidate.score;
@@ -124,13 +139,6 @@ void solve() {
             }
         }
         return best_index;
-    };
-
-    auto mutate = [&](Candidate& candidate) {
-        for (int i = 0; i < MUTATION_BITS; i++) {
-            int j = randomNumber(n - 1);
-            candidate.flip(j, n, q);
-        }
     };
 
     auto sortPopulation = [&]() {
@@ -155,8 +163,9 @@ void solve() {
             while ((int)new_population.size() < POPULATION_SIZE) {
                 Candidate a = population[getRandomCandidateIndex()];
                 Candidate b = population[getRandomCandidateIndex()];
-                Candidate child = a.crossOver(b, n, q);
-                mutate(child);
+                Candidate child = a.crossOver(b);
+                child.mutate();
+                child.search();
                 new_population.push_back(child);
                 if (child.score > best_score) {
                     best_score = child.score;
