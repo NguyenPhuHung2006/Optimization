@@ -47,42 +47,75 @@ void solve() {
     int ELITE_COUNT = 0.05 * POPULATION_SIZE;
     int MUTATION_BITS = 1;
     int TOURNAMENT_SIZE = 3;
+    int NUM_GENERATION = 1000;
     constexpr int N = 500;
 
     struct Candidate {
         bitset<N> x;
         ll score;
-    };
+        vector<ll> delta;
 
-    vector<Candidate> population(POPULATION_SIZE);
-
-    auto evaluate = [&](const bitset<N>& x) -> ll {
-        ll score = 0;
-        for (int i = 0; i < n; i++) {
-            if (!x[i]) {
-                continue;
+        void setRandomX(const int& n) {
+            for (int i = 0; i < n; i++) {
+                x[i] = randomNumber(1);
             }
-            for (int j = 0; j < n; j++) {
-                if (x[j]) {
-                    score += q[i][j];
+        } 
+
+        // this function should only be called when setRandomX is called
+        void init(const int& n, const vector<vector<int>>& q) {
+            delta.assign(n, 0LL);
+            score = 0LL;
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    score += q[i][j] * x[i] * x[j];
+                    delta[i] += (i == j ? 1LL : 2LL) * q[i][j] * x[j];
+                }
+                if (x[i] == 1) {
+                    delta[i] *= -1;
                 }
             }
         }
-        return score;
+
+        void flip(int i, const int& n, const vector<vector<int>>& q) {
+            score += delta[i];
+            for (int j = 0; j < n; j++) {
+                if (i == j) {
+                    delta[i] *= -1;
+                } else {
+                    delta[i] += 2LL * (x[i] ^ x[j] ? -1 : 1) * q[i][j];
+                }
+            }
+            x.flip(i);
+        }
+
+        Candidate crossOver(const Candidate& other, const int& n, const vector<vector<int>>& q) {
+
+        }
+
+        void search() {
+
+        }
     };
+
+    vector<Candidate> population(POPULATION_SIZE);
+    bitset<N> best_x;
+    ll INF = LLONG_MAX;
+    ll best_score = -INF;
 
     auto generateCandidates = [&]() {
         for (int p = 0; p < POPULATION_SIZE; p++) {
             Candidate candidate;
-            for (int i = 0; i < n; i++) {
-                candidate.x[i] = randomNumber(1);
-            }
-            candidate.score = evaluate(candidate.x);
+            candidate.setRandomX(n);
+            candidate.init(n, q);
             population[p] = candidate;
+            if (candidate.score > best_score) {
+                best_score = candidate.score;
+                best_x = candidate.x;
+            }
         }
     };
 
-    auto selectCandidateIndex = [&]() {
+    auto getRandomCandidateIndex = [&]() {
         int best_index = randomNumber(POPULATION_SIZE - 1);
         for (int i = 1; i < TOURNAMENT_SIZE; i++) {
             int index = randomNumber(POPULATION_SIZE - 1);
@@ -93,16 +126,53 @@ void solve() {
         return best_index;
     };
 
-    auto crossOver = [&](const Candidate& a, const Candidate& b) -> Candidate {
-
-    };
-
     auto mutate = [&](Candidate& candidate) {
         for (int i = 0; i < MUTATION_BITS; i++) {
             int j = randomNumber(n - 1);
-            candidate.x.flip(j);
+            candidate.flip(j, n, q);
         }
     };
+
+    auto sortPopulation = [&]() {
+        partial_sort(
+            population.begin(),
+            population.begin() + ELITE_COUNT,
+            population.end(),
+            [](const Candidate& a, const Candidate& b) {
+                return a.score > b.score;
+            }
+        );
+    };
+
+    auto generating = [&]() {
+        vector<Candidate> new_population;
+        for (int generation = 0; generation < NUM_GENERATION; generation++) {
+            sortPopulation();
+            new_population.clear();
+            for (int elite = 0; elite < ELITE_COUNT; elite++) {
+                new_population.push_back(population[elite]);
+            }
+            while ((int)new_population.size() < POPULATION_SIZE) {
+                Candidate a = population[getRandomCandidateIndex()];
+                Candidate b = population[getRandomCandidateIndex()];
+                Candidate child = a.crossOver(b, n, q);
+                mutate(child);
+                new_population.push_back(child);
+                if (child.score > best_score) {
+                    best_score = child.score;
+                    best_x = child.x;
+                }
+            }
+            population = new_population;
+        }
+    };
+
+    generateCandidates();
+    generating();
+
+    for (int i = 0; i < n; i++) {
+        cout << best_x[i] << ' ';
+    }
 
 }
 
