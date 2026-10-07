@@ -44,8 +44,8 @@ void solve() {
         q[c][r] = v;
     }
 
-    int ITER_PER_RUN = 50 * n;
-    int RUN = max(1, (int)1e6 / ITER_PER_RUN);
+    int ITER_PER_RUN = 100 * n;
+    int RUN = max(1, (int)1e5 / ITER_PER_RUN);
     int MAX_TELEPORT = (int)sqrt(ITER_PER_RUN);
     int MAX_FLIP = n / 4;
     constexpr int N = 500;
@@ -56,6 +56,7 @@ void solve() {
     ll cur_score;
     ll INF = LLONG_MAX;
     ll best_score = -INF;
+    int K = 4;
     vector<ll> delta(n);
 
     auto initializeRandomX = [&]() {
@@ -80,23 +81,38 @@ void solve() {
         }
     };
 
-    auto getMaxDeltaIndex = [&]() -> int {
-        int best_i = -1;
-        ll best_delta = -INF;
-        int count = 0;
+    auto getIndex = [&]() -> int {
+        // int best_i = -1;
+        // ll best_delta = -INF;
+        // int count = 0;
+        // for (int i = 0; i < n; i++) {
+        //     if (delta[i] > best_delta) {
+        //         best_delta = delta[i];
+        //         best_i = i;
+        //         count = 1;
+        //     } else if (delta[i] == best_delta) {
+        //         count++;
+        //         if (randomNumber(count - 1) == 0) {
+        //             best_i = i;
+        //         }
+        //     }
+        // }
+        // return best_i;
+
+        priority_queue<pair<ll, int>, vector<pair<ll, int>>, greater<pair<ll, int>>> pq;
+
         for (int i = 0; i < n; i++) {
-            if (delta[i] > best_delta) {
-                best_delta = delta[i];
-                best_i = i;
-                count = 1;
-            } else if (delta[i] == best_delta) {
-                count++;
-                if (randomNumber(count - 1) == 0) {
-                    best_i = i;
-                }
+            pq.push({delta[i], i});
+
+            if ((int)pq.size() > K) {
+                pq.pop();
             }
         }
-        return best_i;
+        int k = randomNumber(K - 1);
+        while (k--) {
+            pq.pop();
+        }
+        return pq.top().second;
     };
 
     auto update = [&](int i) {
@@ -118,7 +134,7 @@ void solve() {
     auto search = [&]() {
         int num_teleport = 1 + randomNumber(MAX_TELEPORT - 1);
         for (int iteration = 0; iteration < ITER_PER_RUN; iteration++) {
-            int i = getMaxDeltaIndex();
+            int i = getIndex();
             if (delta[i] > 0) {
                 update(i);
             } else {
