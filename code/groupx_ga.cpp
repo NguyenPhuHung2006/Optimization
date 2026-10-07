@@ -63,10 +63,14 @@ void solve() {
         ll score;
         vector<ll> delta;
 
-        void setRandomX() {
+        static void randomizeBitSet(bitset<N>& b) {
             for (int i = 0; i < n; i++) {
-                x[i] = randomNumber(1);
+                b[i] = randomNumber(1);
             }
+        }
+
+        void setRandomX() {
+            randomizeBitSet(x);
         } 
 
         // this function should only be called when setRandomX is called
@@ -96,6 +100,18 @@ void solve() {
             x.flip(i);
         }
 
+        void flip(const bitset<N>& f) {
+            int num_flip = f.count();
+            if (num_flip == 0) {
+                return;
+            }
+            for (int i = 0; i < n; i++) {
+                if (f[i]) {
+                    flip(i);
+                }
+            }
+        }
+
         void mutate() {
             for (int i = 0; i < MUTATION_BITS; i++) {
                 int j = randomNumber(n - 1);
@@ -104,7 +120,26 @@ void solve() {
         }
 
         Candidate crossOver(const Candidate& other) {
+            bitset<N> rnd;
+            randomizeBitSet(rnd);
+            /**
+             * rnd[i] = 0 => child_x[i] = x[i]
+             * rnd[i] = 1 => child_x[i] = other.x[i]
+             */
+            bitset<N> child_x = (x & ~rnd) | (other.x & rnd);
+            /**
+             * f[i] = 0 => do nothing
+             * f[i] = 1 => flip x[i] or x[i] = ~x[i]
+             */
+            bitset<N> f = x ^ child_x;
 
+            Candidate child;
+            child.x = x;
+            child.score = score;
+            child.delta = delta;
+
+            child.flip(f);
+            return child;
         }
 
         void search() {
@@ -161,8 +196,8 @@ void solve() {
                 new_population.push_back(population[elite]);
             }
             while ((int)new_population.size() < POPULATION_SIZE) {
-                Candidate a = population[getRandomCandidateIndex()];
-                Candidate b = population[getRandomCandidateIndex()];
+                Candidate& a = population[getRandomCandidateIndex()];
+                Candidate& b = population[getRandomCandidateIndex()];
                 Candidate child = a.crossOver(b);
                 child.mutate();
                 child.search();
