@@ -44,9 +44,9 @@ void solve() {
     }
 
     int POPULATION_SIZE = 100;
-    int ELITE = 0.05 * POPULATION_SIZE;
-    int NUM_MUTATION_BIT = 1;
-    int NUM_SELECT = 3;
+    int ELITE_COUNT = 0.05 * POPULATION_SIZE;
+    int MUTATION_BITS = 1;
+    int TOURNAMENT_SIZE = 3;
     constexpr int N = 500;
 
     struct Candidate {
@@ -84,7 +84,7 @@ void solve() {
 
     auto selectCandidateIndex = [&]() {
         int best_index = randomNumber(POPULATION_SIZE - 1);
-        for (int i = 1; i < NUM_SELECT; i++) {
+        for (int i = 1; i < TOURNAMENT_SIZE; i++) {
             int index = randomNumber(POPULATION_SIZE - 1);
             if (population[index].score > population[best_index].score) {
                 best_index = index;
@@ -98,7 +98,7 @@ void solve() {
     };
 
     auto mutate = [&](Candidate& candidate) {
-        for (int i = 0; i < NUM_MUTATION_BIT; i++) {
+        for (int i = 0; i < MUTATION_BITS; i++) {
             int j = randomNumber(n - 1);
             candidate.x.flip(j);
         }
