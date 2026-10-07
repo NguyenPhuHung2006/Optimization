@@ -44,10 +44,10 @@ void solve() {
         q[c][r] = v;
     }
 
-    int ITER_PER_RUN = 5 * n;
-    int RUN = max(1, (int)1e5 / ITER_PER_RUN);
-    int MAX_TELEPORT = 30;
-    int MAX_FLIP = max(3, (int)sqrt(n));
+    int ITER_PER_RUN = 50 * n;
+    int RUN = max(1, (int)1e6 / ITER_PER_RUN);
+    int MAX_TELEPORT = (int)sqrt(ITER_PER_RUN);
+    int MAX_FLIP = n / 4;
     constexpr int N = 500;
 
     bitset<N> cur_x;
@@ -80,7 +80,7 @@ void solve() {
         }
     };
 
-    auto getIndex = [&]() -> int {
+    auto getMaxDeltaIndex = [&]() -> int {
         int best_i = -1;
         ll best_delta = -INF;
         int count = 0;
@@ -118,8 +118,8 @@ void solve() {
     auto search = [&]() {
         int num_teleport = 1 + randomNumber(MAX_TELEPORT - 1);
         for (int iteration = 0; iteration < ITER_PER_RUN; iteration++) {
-            int i = getIndex();
-            if (i != -1 && delta[i] > 0) {
+            int i = getMaxDeltaIndex();
+            if (delta[i] > 0) {
                 update(i);
             } else {
                 if (num_teleport == 0) {
