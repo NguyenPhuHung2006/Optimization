@@ -101,9 +101,9 @@ void solve() {
             score += delta[i];
             for (int j = 0; j < n; j++) {
                 if (i == j) {
-                    delta[i] *= -1;
+                    delta[j] *= -1;
                 } else {
-                    delta[i] += 2LL * (x[i] ^ x[j] ? -1 : 1) * q[i][j];
+                    delta[j] += 2LL * (x[i] ^ x[j] ? -1 : 1) * q[i][j];
                 }
             }
             x.flip(i);
