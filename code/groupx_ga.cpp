@@ -200,14 +200,14 @@ void solve() {
         }
 
         void search() {
-            // for (int iteration = 0; iteration < ITER_PER_CHILD; iteration++) {
-            //     int i = getBestDeltaIndex();
-            //     if (delta[i] > 0) {
-            //         flip(i);
-            //     } else {
-            //         return;
-            //     }
-            // }
+            for (int iteration = 0; iteration < ITER_PER_CHILD; iteration++) {
+                int i = getBestDeltaIndex();
+                if (delta[i] > 0) {
+                    flip(i);
+                } else {
+                    return;
+                }
+            }
         }
     };
 
