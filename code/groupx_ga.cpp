@@ -93,7 +93,11 @@ void solve() {
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
                     score += q[i][j] * x[i] * x[j];
-                    delta[i] += (i == j ? 1LL : 2LL) * q[i][j] * x[j];
+                    if (i == j) {
+                        delta[i] += q[i][i];
+                    } else {
+                        delta[i] += 2LL * q[i][j] * x[j];
+                    }
                 }
                 if (x[i] == 1) {
                     delta[i] *= -1;
