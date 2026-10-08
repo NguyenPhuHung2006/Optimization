@@ -39,6 +39,8 @@ int ELITE_COUNT;
 int MUTATION_BITS;
 int TOURNAMENT_SIZE;
 int NUM_GENERATION;
+int ITER_PER_CHILD;
+ll INF = LLONG_MAX;
 constexpr int N = 500;
 
 void solve() {
@@ -52,11 +54,18 @@ void solve() {
         q[j][i] = v;
     }
 
-    POPULATION_SIZE = 100;
-    ELITE_COUNT = 0.05 * POPULATION_SIZE;
+    // POPULATION_SIZE = 100;
+    // ELITE_COUNT = 0.05 * POPULATION_SIZE;
+    // MUTATION_BITS = 1;
+    // TOURNAMENT_SIZE = 3;
+    // NUM_GENERATION = 1000;
+
+    POPULATION_SIZE = 50;
+    ELITE_COUNT = 1;
+    TOURNAMENT_SIZE = 2;
     MUTATION_BITS = 1;
-    TOURNAMENT_SIZE = 3;
     NUM_GENERATION = 1000;
+    ITER_PER_CHILD = 10;
 
     struct Candidate {
         bitset<N> x;
@@ -142,14 +151,39 @@ void solve() {
             return child;
         }
 
-        void search() {
+        int getBestDeltaIndex() {
+            ll best_delta = -INF;
+            int best_i = -1;
+            int count = 0;
+            for (int i = 0; i < n; i++) {
+                if (delta[i] > best_delta) {
+                    best_delta = delta[i];
+                    best_i = i;
+                    count = 1;
+                } else if (delta[i] == best_delta) {
+                    count++;
+                    if (randomNumber(count - 1)) {
+                        best_i = i;
+                    }
+                }
+            }
+            return best_i;
+        }
 
+        void search() {
+            for (int iteration = 0; iteration < ITER_PER_CHILD; iteration++) {
+                int i = getBestDeltaIndex();
+                if (delta[i] > 0) {
+                    flip(i);
+                } else {
+                    return;
+                }
+            }
         }
     };
 
     vector<Candidate> population(POPULATION_SIZE);
     bitset<N> best_x;
-    ll INF = LLONG_MAX;
     ll best_score = -INF;
 
     auto generateCandidates = [&]() {
