@@ -47,7 +47,7 @@ void solve() {
     int ITER_PER_RUN = 50 * n;
     int RUN = max(1, (int)1e6 / ITER_PER_RUN);
     int MAX_TELEPORT = (int)sqrt(ITER_PER_RUN);
-    int MAX_FLIP = n / 4;
+    int MAX_FLIP = max(1, n / 4);
     constexpr int N = 500;
 
     bitset<N> cur_x;
