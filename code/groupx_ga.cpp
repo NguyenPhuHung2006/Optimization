@@ -25,9 +25,9 @@ using namespace std;
 using ll = long long;
 constexpr bool has_mutiple_tests = false;
 
-int randomNumber(int n) {
+int randomNumber(int n, int start = 0) {
     static std::mt19937 rng(std::random_device{}());
-    std::uniform_int_distribution<int> dist(0, n);
+    std::uniform_int_distribution<int> dist(start, n);
     return dist(rng);
 }
 
@@ -40,6 +40,8 @@ int MUTATION_BITS;
 int TOURNAMENT_SIZE;
 int NUM_GENERATION;
 int ITER_PER_CHILD;
+int LEFT_CROSS_INDEX;
+int RIGHT_CROSS_INDEX;
 ll INF = LLONG_MAX;
 constexpr int N = 500;
 
@@ -60,12 +62,14 @@ void solve() {
     // TOURNAMENT_SIZE = 3;
     // NUM_GENERATION = 1000;
 
-    POPULATION_SIZE = 50;
-    ELITE_COUNT = 1;
+    POPULATION_SIZE = 150;
+    ELITE_COUNT = 5;
     TOURNAMENT_SIZE = 2;
     MUTATION_BITS = 1;
     NUM_GENERATION = 1000;
     ITER_PER_CHILD = 10;
+    LEFT_CROSS_INDEX = n / 3;
+    RIGHT_CROSS_INDEX = (2 * n) / 3;
 
     struct Candidate {
         bitset<N> x;
@@ -128,7 +132,7 @@ void solve() {
             }
         }
 
-        Candidate crossOver(const Candidate& other) {
+        Candidate uniformCrossOver(const Candidate& other) const {
             bitset<N> rnd;
             randomizeBitSet(rnd);
             /**
@@ -151,6 +155,31 @@ void solve() {
             return child;
         }
 
+        vector<Candidate> onePointCrossOver(const Candidate& other) const {
+            int cross_index = randomNumber(RIGHT_CROSS_INDEX, LEFT_CROSS_INDEX);
+            bitset<N> mask;
+            mask.set();
+            mask <<= (cross_index + 1);
+            bitset<N> f = (x ^ other.x) & mask;
+
+            Candidate child1;
+            child1.x = x;
+            child1.score = score;
+            child1.delta = delta;
+            child1.flip(f);
+
+            Candidate child2;
+            child2.x = other.x;
+            child2.score = other.score;
+            child2.delta = other.delta;
+            child2.flip(f);
+
+            vector<Candidate> children(2);
+            children[0] = child1;
+            children[1] = child2;
+            return children;
+        }
+
         int getBestDeltaIndex() {
             ll best_delta = -INF;
             int best_i = -1;
@@ -171,14 +200,14 @@ void solve() {
         }
 
         void search() {
-            for (int iteration = 0; iteration < ITER_PER_CHILD; iteration++) {
-                int i = getBestDeltaIndex();
-                if (delta[i] > 0) {
-                    flip(i);
-                } else {
-                    return;
-                }
-            }
+            // for (int iteration = 0; iteration < ITER_PER_CHILD; iteration++) {
+            //     int i = getBestDeltaIndex();
+            //     if (delta[i] > 0) {
+            //         flip(i);
+            //     } else {
+            //         return;
+            //     }
+            // }
         }
     };
 
@@ -221,6 +250,30 @@ void solve() {
         );
     };
 
+    auto uniformCrossOver = [&](const Candidate& a, const Candidate& b, vector<Candidate>& new_population) {
+        Candidate child = a.uniformCrossOver(b);
+        child.mutate();
+        child.search();
+        new_population.push_back(child);
+        if (child.score > best_score) {
+            best_score = child.score;
+            best_x = child.x;
+        }
+    };
+
+    auto onePointCrossOver = [&](const Candidate& a, const Candidate& b, vector<Candidate>& new_population) {
+        vector<Candidate> children = a.onePointCrossOver(b);
+        for (Candidate& child : children) {
+            child.mutate();
+            child.search();
+            new_population.push_back(child);
+            if (child.score > best_score) {
+                best_score = child.score;
+                best_x = child.x;
+            }
+        }
+    };
+
     auto generating = [&]() {
         vector<Candidate> new_population;
         for (int generation = 0; generation < NUM_GENERATION; generation++) {
@@ -232,14 +285,8 @@ void solve() {
             while ((int)new_population.size() < POPULATION_SIZE) {
                 Candidate& a = population[getRandomCandidateIndex()];
                 Candidate& b = population[getRandomCandidateIndex()];
-                Candidate child = a.crossOver(b);
-                child.mutate();
-                child.search();
-                new_population.push_back(child);
-                if (child.score > best_score) {
-                    best_score = child.score;
-                    best_x = child.x;
-                }
+                // uniformCrossOver(a, b, new_population);
+                onePointCrossOver(a, b, new_population);
             }
             population = new_population;
         }
