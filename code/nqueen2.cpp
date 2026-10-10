@@ -60,35 +60,84 @@ void reset() {
     board.assign(n, vector<int>());
 }
 
-pair<int,int> getLeastConflictPos() {
-    int min_conflict = 5;
-    int R = -1, C = -1;
+bool isValidPosition(int r, int c) {
+    if (c == fixedQueen[r]) {
+        return false;
+    }
+
+    if (cols[c] >= 2 ||
+        diag1[r - c + n - 1] >= 2 ||
+        diag2[r + c] >= 2) {
+        return false;
+    }
+
+    return true;
+}
+
+pair<int, int> getLeastConflictPos() {
+    int min_options = INT_MAX;
+
+    int R = -1;
     int count = 0;
+
     for (int r = 0; r < n; r++) {
-        if (rows[r] == 2) {
+        if (rows[r] >= 2) {
             continue;
         }
+
+        int options = 0;
+
         for (int c = 0; c < n; c++) {
-            if (c == fixedQueen[r] || cols[c] == 2 || diag1[r - c + n - 1] == 2 || diag2[r + c] == 2) {
-                continue;
+            if (isValidPosition(r, c)) {
+                options++;
             }
-            int num_conflict = rows[r] + cols[c] + diag1[r - c + n - 1] + diag2[r + c];
-            if (num_conflict < min_conflict) {
-                min_conflict = num_conflict;
+        }
+
+        if (options == 0) {
+            continue;
+        }
+
+        if (options < min_options) {
+            min_options = options;
+            R = r;
+            count = 1;
+        } else if (options == min_options) {
+            count++;
+            if (randomNumber(count - 1) == 0) {
                 R = r;
+            }
+        }
+    }
+
+    if (R == -1) {
+        return {-1, -1};
+    }
+
+    int min_conflict = INT_MAX;
+    int C = -1;
+    count = 0;
+
+    for (int c = 0; c < n; c++) {
+        if (!isValidPosition(R, c)) {
+            continue;
+        }
+
+        int conflicts = rows[R] + cols[c] + diag1[R - c + n - 1] + diag2[R + c];
+
+        if (conflicts < min_conflict) {
+            min_conflict = conflicts;
+            C = c;
+            count = 1;
+        } else if (conflicts == min_conflict) {
+            count++;
+            if (randomNumber(count - 1) == 0) {
                 C = c;
-                count = 1;
-            } else if (num_conflict == min_conflict) {
-                count++;
-                if (randomNumber(count - 1) == 0) {
-                    R = r;
-                    C = c;
-                }
             }
         }
     }
     return {R, C};
 }
+
 
 void placeQueen(int r, int c) {
     board[r].push_back(c);
@@ -134,8 +183,8 @@ void solve() {
             }
         }
 
-        MAX_ITERATIONS = 100 * n;
-        RUN = max(1, (int)1e5 / MAX_ITERATIONS);
+        MAX_ITERATIONS = 2 * n;
+        RUN = max(2, (int)1e4 / MAX_ITERATIONS);
 
         for (int run = 0; run < RUN; run++) {
             reset();
@@ -144,17 +193,26 @@ void solve() {
                 best_count = cur_count;
                 best_board = board;
             }
+            if (best_count == 2 * n) {
+                break;
+            }
         }
-        int k = 0;
-        for (int r = 0; r < n; r++) {
-            k += board[r].size();
-        }
-        cout << k << '\n';
+        cout << best_count << '\n';
         for (int r = 0; r < n; r++) {
             for (int c : best_board[r]) {
                 cout << r + 1 << ' ' << c + 1 << '\n';
             }
         }
+        // bool valid = true;
+        // for (int r = 0; r < n; r++) {
+        //     for (int c = 0; c < n; c++) {
+        //         if (rows[r] > 2 || cols[c] > 2 || diag1[r - c + n - 1] > 2 || diag2[r + c] > 2) {
+        //             valid = false;
+        //             break;
+        //         }
+        //     }
+        // }
+        // cout << (valid ? "true" : "false") << ' ' << best_count << endl; 
     }
 }
 
