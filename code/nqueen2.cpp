@@ -35,6 +35,7 @@ int fixedQueen[N];
 int MAX_ITERATIONS;
 int RUN;
 int best_count;
+int fixed_count;
 
 vector<vector<int>> board;
 vector<vector<int>> best_board;
@@ -94,7 +95,7 @@ pair<int, int> getLeastConflictPos() {
         }
 
         if (options == 0) {
-            continue;
+            return {-1, -1};
         }
 
         if (options < min_options) {
@@ -169,12 +170,14 @@ void solve() {
         fill(fixedQueen, fixedQueen + N, -1);
         board.assign(n, vector<int>());
         best_count = 0;
+        fixed_count = 0;
 
         for (int r = 0; r < n; r++) {
             int c;
             cin >> c;
             c--;
             if (c >= 0) {
+                fixed_count++;
                 fixedQueen[r] = c;
                 rows[r]++;
                 cols[c]++;
@@ -193,7 +196,7 @@ void solve() {
                 best_count = cur_count;
                 best_board = board;
             }
-            if (best_count == 2 * n) {
+            if (best_count + fixed_count == 2 * n) {
                 break;
             }
         }
