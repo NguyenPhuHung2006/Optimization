@@ -160,28 +160,28 @@ void solve() {
         board.assign(n, vector<int>());
 
         int num_fixed_queen = 0;
-        for (int r = 0; r < n; r++) {
-            int c;
-            cin >> c;
-            c--;
-            if (c >= 0) {
-                num_fixed_queen++;
-                fixedQueen[r] = c;
-                rows[r]++;
-                cols[c]++;
-                diag1[r - c + n - 1]++;
-                diag2[r + c]++;
-            }
-        }
+        // for (int r = 0; r < n; r++) {
+        //     int c;
+        //     cin >> c;
+        //     c--;
+        //     if (c >= 0) {
+        //         num_fixed_queen++;
+        //         fixedQueen[r] = c;
+        //         rows[r]++;
+        //         cols[c]++;
+        //         diag1[r - c + n - 1]++;
+        //         diag2[r + c]++;
+        //     }
+        // }
 
         MAX_ITERATIONS = 100 * n;
-        RUN = 1e5 / MAX_ITERATIONS;
+        RUN = 1e8 / MAX_ITERATIONS;
 
         for (int run = 0; run < RUN; run++) {
             reset();
             initRandomBoard();
             if (minConflict()) {
-                // cout << "found\n";
+                cout << "found\n";
                 break;
             }
         }
@@ -192,6 +192,7 @@ void solve() {
                 cout << r + 1 << ' ' << c + 1 << '\n';
             }
         }
+        cout << endl;
     }  
 }
 
