@@ -116,7 +116,7 @@ bool minConflict() {
         int count = 0;
 
         for (int c = 0; c < n; c++) {
-            if (c == fixedQueen[R] || c == C) {
+            if (c == fixedQueen[R] || find(board[R].begin(), board[R].end(), c) != board[R].end()) {
                 continue;
             }
             int num_conflict = rows[R] + cols[c] + diag1[R - c + n - 1] + diag2[R + c];
