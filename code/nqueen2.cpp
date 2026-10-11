@@ -152,6 +152,35 @@ int search() {
     return count_queens;
 }
 
+void getInput() {
+    for (int r = 0; r < n; r++) {
+        int c;
+        cin >> c;
+        c--;
+        if (c >= 0) {
+            fixed_count++;
+            fixedQueen[r] = c;
+            rows[r]++;
+            cols[c]++;
+            diag1[r - c + n - 1]++;
+            diag2[r + c]++;
+        }
+    }
+}
+
+void checkOutput() {
+    bool valid = true;
+    for (int r = 0; r < n; r++) {
+        for (int c = 0; c < n; c++) {
+            if (rows[r] > 2 || cols[c] > 2 || diag1[r - c + n - 1] > 2 || diag2[r + c] > 2) {
+                valid = false;
+                break;
+            }
+        }
+    }
+    cout << (valid ? "true" : "false") << ' ' << best_count << endl; 
+}
+
 void solve() {
     while (cin >> n) {
         fill(rows, rows + N, 0);
@@ -163,22 +192,10 @@ void solve() {
         best_count = 0;
         fixed_count = 0;
 
-        for (int r = 0; r < n; r++) {
-            int c;
-            cin >> c;
-            c--;
-            if (c >= 0) {
-                fixed_count++;
-                fixedQueen[r] = c;
-                rows[r]++;
-                cols[c]++;
-                diag1[r - c + n - 1]++;
-                diag2[r + c]++;
-            }
-        }
+        // getInput();
 
-        MAX_ITERATIONS = 10 * n;
-        RUN = max(2, (int)1e4 / MAX_ITERATIONS);
+        MAX_ITERATIONS = 5 * n;
+        RUN = max(2, (int)3e4 / MAX_ITERATIONS);
 
         for (int run = 0; run < RUN; run++) {
             reset();
@@ -197,16 +214,7 @@ void solve() {
                 cout << r + 1 << ' ' << c + 1 << '\n';
             }
         }
-        // bool valid = true;
-        // for (int r = 0; r < n; r++) {
-        //     for (int c = 0; c < n; c++) {
-        //         if (rows[r] > 2 || cols[c] > 2 || diag1[r - c + n - 1] > 2 || diag2[r + c] > 2) {
-        //             valid = false;
-        //             break;
-        //         }
-        //     }
-        // }
-        // cout << (valid ? "true" : "false") << ' ' << best_count << endl; 
+        checkOutput();
     }
 }
 
