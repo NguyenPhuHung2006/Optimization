@@ -189,12 +189,13 @@ void solve() {
         fill(diag2, diag2 + 2 * N - 1, 0);
         fill(fixedQueen, fixedQueen + N, -1);
         board.assign(n, vector<int>());
+        best_board.assign(n, vector<int>());
         best_count = 0;
         fixed_count = 0;
 
-        // getInput();
+        getInput();
 
-        MAX_ITERATIONS = 5 * n;
+        MAX_ITERATIONS = 10 * n;
         RUN = max(2, (int)3e4 / MAX_ITERATIONS);
 
         for (int run = 0; run < RUN; run++) {
@@ -214,7 +215,8 @@ void solve() {
                 cout << r + 1 << ' ' << c + 1 << '\n';
             }
         }
-        checkOutput();
+        // cout << 'a' << endl;
+        // checkOutput();
     }
 }
 
