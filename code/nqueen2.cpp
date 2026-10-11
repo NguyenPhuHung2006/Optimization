@@ -66,6 +66,12 @@ bool isValidPosition(int r, int c) {
         return false;
     }
 
+    for (int j : board[r]) {
+        if (j == c) {
+            return false;
+        }
+    }
+
     if (cols[c] >= 2 ||
         diag1[r - c + n - 1] >= 2 ||
         diag2[r + c] >= 2) {
@@ -76,8 +82,6 @@ bool isValidPosition(int r, int c) {
 }
 
 pair<int, int> getLeastConflictPos() {
-    int min_options = INT_MAX;
-
     int R = -1;
     int count = 0;
 
@@ -85,28 +89,9 @@ pair<int, int> getLeastConflictPos() {
         if (rows[r] >= 2) {
             continue;
         }
-
-        int options = 0;
-
-        for (int c = 0; c < n; c++) {
-            if (isValidPosition(r, c)) {
-                options++;
-            }
-        }
-
-        if (options == 0) {
-            return {-1, -1};
-        }
-
-        if (options < min_options) {
-            min_options = options;
+        count++;
+        if (randomNumber(count - 1) == 0) {
             R = r;
-            count = 1;
-        } else if (options == min_options) {
-            count++;
-            if (randomNumber(count - 1) == 0) {
-                R = r;
-            }
         }
     }
 
@@ -150,13 +135,19 @@ void placeQueen(int r, int c) {
 
 int search() {
     int count_queens = 0;
+    int failed = 0;
     for (int iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
         auto[R, C] = getLeastConflictPos();
-        if (R == -1 && C == -1) {
-            break;
+        if (R == -1 || C == -1) {
+            failed++;
+            if (failed >= n) {
+                break;
+            }
+            continue;
         }
         placeQueen(R, C);
         count_queens++;
+        failed = 0;
     }
     return count_queens;
 }
@@ -186,7 +177,7 @@ void solve() {
             }
         }
 
-        MAX_ITERATIONS = 2 * n;
+        MAX_ITERATIONS = 10 * n;
         RUN = max(2, (int)1e4 / MAX_ITERATIONS);
 
         for (int run = 0; run < RUN; run++) {
