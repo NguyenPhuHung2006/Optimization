@@ -205,8 +205,8 @@ void solve() {
 
         getInput();
 
-        MAX_ITERATIONS = 100 * n;
-        RUN = 1e7 / MAX_ITERATIONS;
+        MAX_ITERATIONS = 5 * n;
+        RUN = 1e5 / MAX_ITERATIONS;
 
         for (int run = 0; run < RUN; run++) {
             reset();
