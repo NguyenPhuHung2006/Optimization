@@ -33,6 +33,7 @@ int diag2[2 * N - 1];
 int fixedQueen[N];
 int n;
 vector<vector<int>> board;
+int num_fixed_queen;
 
 int MAX_ITERATIONS;
 int RUN;
@@ -82,7 +83,7 @@ pair<int,int> mostConflictPos() {
     int count = 0;
     for (int r = 0; r < n; r++) {
         for (int c : board[r]) {
-            if (rows[r] == 2 && cols[c] == 2 && diag1[r - c + n - 1] == 2 && diag2[r + c] == 2) {
+            if (rows[r] <= 2 && cols[c] <= 2 && diag1[r - c + n - 1] <= 2 && diag2[r + c] <= 2) {
                 continue;
             }
             int num_conflict = rows[r] + cols[c] + diag1[r - c + n - 1] + diag2[r + c];
@@ -149,8 +150,49 @@ bool minConflict() {
     return false;
 }
 
+void getInput() {
+    for (int r = 0; r < n; r++) {
+        int c;
+        cin >> c;
+        c--;
+        if (c >= 0) {
+            num_fixed_queen++;
+            fixedQueen[r] = c;
+            rows[r]++;
+            cols[c]++;
+            diag1[r - c + n - 1]++;
+            diag2[r + c]++;
+        }
+    }
+}
+
+void checkOutput() {
+    bool valid = true;
+    for (int r = 0; r < n; r++) {
+        for (int c = 0; c < n; c++) {
+            if (rows[r] > 2 || cols[c] > 2 || diag1[r - c + n - 1] > 2 || diag2[r + c] > 2) {
+                valid = false;
+                break;
+            }
+        }
+    }
+    cout << (valid ? "true" : "false") << endl; 
+}
+
 void solve() {
     while (cin >> n) {
+        if (n == 1) {
+            int c;
+            cin >> c;
+            c--;
+            if (c >= 0) {
+                cout << 0 << '\n';
+            } else {
+                cout << 1 << '\n';
+                cout << 1 << ' ' << 1 << '\n';
+            }
+            continue;
+        }
         fill(rows, rows + N, 0);
         fill(cols, cols + N, 0);
         fill(diag1, diag1 + 2 * N - 1, 0);
@@ -159,29 +201,18 @@ void solve() {
 
         board.assign(n, vector<int>());
 
-        int num_fixed_queen = 0;
-        // for (int r = 0; r < n; r++) {
-        //     int c;
-        //     cin >> c;
-        //     c--;
-        //     if (c >= 0) {
-        //         num_fixed_queen++;
-        //         fixedQueen[r] = c;
-        //         rows[r]++;
-        //         cols[c]++;
-        //         diag1[r - c + n - 1]++;
-        //         diag2[r + c]++;
-        //     }
-        // }
+        num_fixed_queen = 0;
+
+        getInput();
 
         MAX_ITERATIONS = 100 * n;
-        RUN = 1e8 / MAX_ITERATIONS;
+        RUN = 1e7 / MAX_ITERATIONS;
 
         for (int run = 0; run < RUN; run++) {
             reset();
             initRandomBoard();
             if (minConflict()) {
-                cout << "found\n";
+                // cout << "found\n";
                 break;
             }
         }
@@ -192,7 +223,7 @@ void solve() {
                 cout << r + 1 << ' ' << c + 1 << '\n';
             }
         }
-        cout << endl;
+        // checkOutput();
     }  
 }
 
